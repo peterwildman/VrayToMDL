@@ -27,8 +27,7 @@ from PySide2.QtWidgets import QFileDialog
 
 from functools import partial
 
-#Max Toggle
-inside_3dsmax = True
+
 
 
 import MaxPlus
@@ -158,8 +157,13 @@ class VrayToMDLModel:
 
     def _gettexture(self, prop):
         if prop.__class__ != type(None):
-            filename = str(mxs.filenameFromPath(prop.filename))
-            return 'texture_2d("'+(self.texturefolder + filename)+'", tex::gamma_srgb)'
+            options = dir(prop)
+            if "filename" in options:
+                filename = (str(mxs.filenameFromPath(prop.filename)) , "tex::gamma_srgb")
+            elif "HDRIMapName" in options:
+                filename = (str(mxs.filenameFromPath(prop.HDRIMapName)) , "tex::gamma_srgb")
+
+            return 'texture_2d("'+(self.texturefolder + filename[0])+'", '+filename[1]+')'
         else:
             return("texture_2d()")
 
@@ -272,7 +276,7 @@ class VrayToMDLModel:
                     if objects.material  not in material_list:
                         material_list.append(objects.material)
                 else:
-                    print("nothing selected")
+                    pass
         elif scene_or_selected == "scene":
             material_list = mxs.sceneMaterials
         return material_list
