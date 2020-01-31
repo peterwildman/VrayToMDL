@@ -155,6 +155,8 @@ class VrayToMDLModel:
         else:
             return 0.0
 
+    
+
     def _gettexture(self, prop):
         if prop.__class__ != type(None):
             options = dir(prop)
@@ -168,10 +170,13 @@ class VrayToMDLModel:
             return("texture_2d()")
 
     def _getroughness(self,material):
+        return round(material.reflection_glossiness, 2)
+    
+    def _getroughnessswitch(self,material):
         if material.brdf_useRoughness == True:
-            return round(material.reflection_glossiness, 2)
+            return "false"
         else:
-            return round((1 -material.reflection_glossiness), 2)
+            return "true"
             
     def _getspecnormal(self, material):
         if material.reflection_fresnel == True:
@@ -200,6 +205,7 @@ class VrayToMDLModel:
         self.mat_dict['reflection_roughness_constant'] = self._getroughness(material)
         self.mat_dict['reflection_roughness_texture_influence'] = self._checkfortexture(material.texmap_reflectionGlossiness)
         self.mat_dict['reflectionroughness_texture'] = self._gettexture(material.texmap_reflectionGlossiness)
+        self.mat_dict['roughness_is_glossiness'] = self._getroughnessswitch(material)
         self.mat_dict['specular_constant'] = self._getcolortofloat(material.reflection)
         self.mat_dict['specular_texture_influence'] =self._checkfortexture(material.texmap_reflection)
         self.mat_dict['specular_texture'] = self._gettexture(material.texmap_reflection)
@@ -230,7 +236,9 @@ class VrayToMDLModel:
                     file.write("    reflection_roughness_texture_influence: ")
                     file.write(str(mat_dict["reflection_roughness_texture_influence"])+",\n")
                     file.write("    reflectionroughness_texture: ")
-                    file.write(str(mat_dict["reflectionroughness_texture"])+",\n")        
+                    file.write(str(mat_dict["reflectionroughness_texture"])+",\n")    
+                    file.write("    roughness_is_glossiness: ")
+                    file.write(str(mat_dict["roughness_is_glossiness"])+",\n")      
                     file.write("    specular_constant: ")
                     file.write(str(mat_dict["specular_constant"])+",\n")        
                     file.write("    specular_texture_influence: ")
